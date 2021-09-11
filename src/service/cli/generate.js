@@ -88,8 +88,7 @@ module.exports = {
     if (countOffer > MAX_COUNT) {
       return console.info(`Not more than 1000 offers`);
     }
-    const content = JSON.stringify(generateOffers(countOffer));
 
-    return writeJSONFile(FILE_NAME, content);
+    return writeJSONFile(FILE_NAME, JSON.stringify(generateOffers(countOffer)));
   }
 };
