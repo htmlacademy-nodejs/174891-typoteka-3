@@ -1,17 +1,21 @@
 'use strict';
 
 const {
-  writeJSONFile,
   generateCategory,
   generateTitle,
   generateDate,
   generateFullText,
-  generateAnnounce
+  generateAnnounce,
+  Utils
 } = require(`../../utils/index`);
 
-const DEFAULT_COUNT = 1;
 const FILE_NAME = `mocks.json`;
-const MAX_COUNT = 1000;
+const INTERVAL_IN_MONTH = 3;
+
+const Count = {
+  DEFAULT_COUNT: 1,
+  MAX_COUNT: 1000,
+};
 
 const TITLES = [
   `Ёлки. История деревьев`,
@@ -68,8 +72,6 @@ const AnnounceRestrict = {
   MAX: 5,
 };
 
-const INTERVAL_IN_MONTH = 3;
-
 const generateOffers = (count) => (
   Array(count).fill({}).map(() => ({
     title: generateTitle(TITLES),
@@ -84,11 +86,11 @@ module.exports = {
   name: `--generate`,
   run(args) {
     const [count] = args;
-    let countOffer = Number.parseInt(count, 10) || DEFAULT_COUNT;
-    if (countOffer > MAX_COUNT) {
+    const countOffer = Number.parseInt(count, 10) || Count.DEFAULT_COUNT;
+    if (countOffer > Count.MAX_COUNT) {
       return console.info(`Not more than 1000 offers`);
     }
 
-    return writeJSONFile(FILE_NAME, JSON.stringify(generateOffers(countOffer)));
+    return Utils.writeJSONFile(FILE_NAME, JSON.stringify(generateOffers(countOffer)));
   }
 };

@@ -1,9 +1,7 @@
 'use strict';
 
 const {
-  getRandomInt,
-  shuffle,
-  writeJSONFile,
+  Utils
 } = require(`./utils`);
 
 const {
@@ -15,9 +13,7 @@ const {
 } = require(`./generatePublications`);
 
 module.exports = {
-  getRandomInt,
-  shuffle,
-  writeJSONFile,
+  Utils,
   generateCategory,
   generateTitle,
   generateAnnounce,
