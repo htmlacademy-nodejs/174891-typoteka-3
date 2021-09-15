@@ -1,6 +1,8 @@
 'use strict';
 
-const fs = require(`fs`);
+const fs = require(`fs`).promises;
+
+const chalk = require(`chalk`);
 
 class Utils {
   static getRandomInt(min, max) {
@@ -18,13 +20,13 @@ class Utils {
     return someArray;
   }
 
-  static writeJSONFile(fileName, data) {
+  static async writeJSONFile(fileName, data) {
     try {
       const content = JSON.stringify(data);
-      fs.writeFileSync(fileName, content);
-      console.info(`Operation success. File created.`);
+      await fs.writeFile(fileName, content);
+      console.info(chalk.green(`Operation success. File created.`));
     } catch (err) {
-      console.error(`Can't write data to file, ${err}`);
+      console.error(chalk.red(`Can't write data to file, ${err}`));
       throw err;
     }
   }
