@@ -20,6 +20,16 @@ class Utils {
     return someArray;
   }
 
+  static async readContent(filePath) {
+    try {
+      const content = await fs.readFile(filePath, `utf8`);
+      return content.trim().split(`\n`);
+    } catch (err) {
+      console.error(chalk.red(err));
+      return [];
+    }
+  }
+
   static async writeJSONFile(fileName, data) {
     try {
       const content = JSON.stringify(data);
