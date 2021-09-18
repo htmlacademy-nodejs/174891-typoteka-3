@@ -12,8 +12,6 @@ const {
 const FILE_NAME = `mocks.json`;
 const INTERVAL_IN_MONTH = 3;
 
-const fs = require(`fs`).promises;
-
 const Count = {
   DEFAULT_COUNT: 1,
   MAX_COUNT: 1000,
@@ -55,14 +53,6 @@ module.exports = {
       return console.info(`Not more than 1000 offers`);
     }
 
-    // return Utils.writeJSONFile(FILE_NAME, JSON.stringify(await generateOffers(countOffer)));
-
-    try {
-      await fs.writeFile(FILE_NAME, JSON.stringify(await generateOffers(countOffer)));
-      console.info(`Operation success. File created.`);
-    } catch (err) {
-      console.error(`Can't write data to file, ${err}`);
-      throw err;
-    }
+    return Utils.writeJSONFile(FILE_NAME, await generateOffers(countOffer));
   }
 };
