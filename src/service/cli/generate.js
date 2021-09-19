@@ -17,80 +17,42 @@ const Count = {
   MAX_COUNT: 1000,
 };
 
-const TITLES = [
-  `Ёлки. История деревьев`,
-  `Как перестать беспокоиться и начать жить`,
-  `Как достигнуть успеха не вставая с кресла`,
-  `Обзор новейшего смартфона`,
-  `Лучшие рок-музыканты 20-века`,
-  `Как начать программировать`,
-  `Учим HTML и CSS`,
-  `Что такое золотое сечение`,
-  `Как собрать камни бесконечности`,
-  `Борьба с прокрастинацией`,
-  `Рок — это протест`,
-  `Самый лучший музыкальный альбом этого года`,
-];
-
-const SENTENCES = [
-  `Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-  `Первая большая ёлка была установлена только в 1938 году.`,
-  `Вы можете достичь всего. Стоит только немного постараться и запастись книгами.`,
-  `Этот смартфон — настоящая находка. Большой и яркий экран, мощнейший процессор — всё это в небольшом гаджете.`,
-  `Золотое сечение — соотношение двух величин, гармоническая пропорция.`,
-  `Собрать камни бесконечности легко, если вы прирожденный герой.`,
-  `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике.`,
-  `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-  `Программировать не настолько сложно, как об этом говорят.`,
-  `Простые ежедневные упражнения помогут достичь успеха.`,
-  `Это один из лучших рок-музыкантов.`,
-  `Он написал больше 30 хитов.`,
-  `Из под его пера вышло 8 платиновых альбомов.`,
-  `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем.`,
-  `Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле?`,
-  `Достичь успеха помогут ежедневные повторения.`,
-  `Помните, небольшое количество ежедневных упражнений лучше, чем один раз, но много.`,
-  `Как начать действовать? Для начала просто соберитесь.`,
-  `Игры и программирование разные вещи. Не стоит идти в программисты, если вам нравятся только игры.`,
-  `Альбом стал настоящим открытием года. Мощные гитарные рифы и скоростные соло-партии не дадут заскучать.`,
-];
-
-const CATEGORIES = [
-  `Деревья`,
-  `За жизнь`,
-  `Без рамки`,
-  `Разное`,
-  `IT`,
-  `Музыка`,
-  `Кино`,
-  `Программирование`,
-  `Железо`,
-];
-
 const AnnounceRestrict = {
   MIN: 1,
   MAX: 5,
 };
 
-const generateOffers = (count) => (
-  Array(count).fill({}).map(() => ({
-    title: generateTitle(TITLES),
-    announce: generateAnnounce(SENTENCES, AnnounceRestrict.MIN, AnnounceRestrict.MAX),
-    fullText: generateFullText(SENTENCES),
+const Path = {
+  FILE_SENTENCES_PATH: `./data/sentences.txt`,
+  FILE_TITLES_PATH: `./data/titles.txt`,
+  FILE_CATEGORIES_PATH: `./data/categories.txt`,
+};
+
+const generateOffers = async (count) => {
+  const [categories, sentences, titles] = await Promise.all([
+    Utils.readContent(Path.FILE_CATEGORIES_PATH),
+    Utils.readContent(Path.FILE_SENTENCES_PATH),
+    Utils.readContent(Path.FILE_TITLES_PATH),
+  ]);
+
+  return Array(count).fill({}).map(() => ({
+    title: generateTitle(titles),
+    announce: generateAnnounce(sentences, AnnounceRestrict.MIN, AnnounceRestrict.MAX),
+    fullText: generateFullText(sentences),
     createdDate: generateDate(INTERVAL_IN_MONTH),
-    category: generateCategory(CATEGORIES),
-  }))
-);
+    category: generateCategory(categories),
+  }));
+};
 
 module.exports = {
   name: `--generate`,
-  run(args) {
+  async run(args) {
     const [count] = args;
     const countOffer = Number.parseInt(count, 10) || Count.DEFAULT_COUNT;
     if (countOffer > Count.MAX_COUNT) {
       return console.info(`Not more than 1000 offers`);
     }
 
-    return Utils.writeJSONFile(FILE_NAME, JSON.stringify(generateOffers(countOffer)));
+    return Utils.writeJSONFile(FILE_NAME, await generateOffers(countOffer));
   }
 };

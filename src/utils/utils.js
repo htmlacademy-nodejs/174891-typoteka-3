@@ -20,10 +20,19 @@ class Utils {
     return someArray;
   }
 
+  static async readContent(filePath) {
+    try {
+      const content = await fs.readFile(filePath, `utf-8`);
+      return content.trim().split(`\n`);
+    } catch (err) {
+      console.error(chalk.red(err));
+      return [];
+    }
+  }
+
   static async writeJSONFile(fileName, data) {
     try {
-      const content = JSON.stringify(data);
-      await fs.writeFile(fileName, content);
+      await fs.writeFile(fileName, JSON.stringify(data));
       console.info(chalk.green(`Operation success. File created.`));
     } catch (err) {
       console.error(chalk.red(`Can't write data to file, ${err}`));
