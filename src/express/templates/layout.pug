@@ -1,0 +1,13 @@
+doctype html
+html(lang="ru")
+  block head
+    include blocks/head.pug
+  body
+    .wrapper
+      block header
+        include blocks/header.pug
+      block content
+      block footer
+        include blocks/footer.pug
+    block scripts
+      include blocks/js-scripts.pug
