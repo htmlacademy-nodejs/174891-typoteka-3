@@ -9,7 +9,8 @@ const {
   generateTitle,
   generateAnnounce,
   generateFullText,
-  generateDate
+  generateDate,
+  generateComments
 } = require(`./generatePublications`);
 
 module.exports = {
@@ -18,5 +19,6 @@ module.exports = {
   generateTitle,
   generateAnnounce,
   generateFullText,
-  generateDate
+  generateDate,
+  generateComments
 };
