@@ -1,8 +1,10 @@
 'use strict';
 
+const {getLogger} = require(`../lib/logger`);
+
 const fs = require(`fs`).promises;
 
-const chalk = require(`chalk`);
+const logger = getLogger({name: `api`});
 
 class Utils {
   static getRandomInt(min, max) {
@@ -25,7 +27,7 @@ class Utils {
       const content = await fs.readFile(filePath, `utf-8`);
       return content.trim().split(`\n`);
     } catch (err) {
-      console.error(chalk.red(err));
+      logger.error(err);
       return [];
     }
   }
@@ -33,9 +35,9 @@ class Utils {
   static async writeJSONFile(fileName, data) {
     try {
       await fs.writeFile(fileName, JSON.stringify(data));
-      console.info(chalk.green(`Operation success. File created.`));
+      logger.info(`Operation success. File created.`);
     } catch (err) {
-      console.error(chalk.red(`Can't write data to file, ${err}`));
+      logger.error(`Can't write data to file, ${err}`);
       throw err;
     }
   }
