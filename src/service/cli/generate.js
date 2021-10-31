@@ -10,6 +10,8 @@ const {
   Utils
 } = require(`../../utils/index`);
 
+const {getLogger} = require(`../lib/logger`);
+
 const {nanoid} = require(`nanoid`);
 const {MAX_ID_LENGTH} = require(`../../constants`);
 
@@ -38,6 +40,8 @@ const CommentCount = {
   MAX: 10
 };
 
+const logger = getLogger({name: `api`});
+
 const generateOffers = async (count) => {
   const [categories, sentences, titles, comments] = await Promise.all([
     Utils.readContent(Path.FILE_CATEGORIES_PATH),
@@ -63,7 +67,7 @@ module.exports = {
     const [count] = args;
     const countOffer = Number.parseInt(count, 10) || Count.DEFAULT_COUNT;
     if (countOffer > Count.MAX_COUNT) {
-      return console.info(`Not more than 1000 offers`);
+      return logger.info(`Not more than 1000 offers`);
     }
 
     return Utils.writeJSONFile(FILE_NAME, await generateOffers(countOffer));

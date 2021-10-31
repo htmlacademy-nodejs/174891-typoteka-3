@@ -6,6 +6,11 @@ const USER_ARGV_INDEX = 2;
 
 const MAX_ID_LENGTH = 6;
 
+const Env = {
+  DEVELOPMENT: `development`,
+  PRODUCTION: `production`
+};
+
 const ExitCode = {
   ERROR: 1,
   SUCCESS: 0,
@@ -32,5 +37,6 @@ module.exports = {
   MAX_ID_LENGTH,
   ExitCode,
   HttpCode,
-  KeysForValidation
+  KeysForValidation,
+  Env
 };

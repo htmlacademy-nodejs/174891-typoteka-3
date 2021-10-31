@@ -1,8 +1,12 @@
 'use strict';
 
 const fs = require(`fs`).promises;
-const chalk = require(`chalk`);
+const {getLogger} = require(`../lib/logger`);
+
 const FILENAME = `mocks.json`;
+
+const logger = getLogger({name: `api`});
+
 let data = [];
 
 const getMockData = async () => {
@@ -14,7 +18,7 @@ const getMockData = async () => {
     const fileContent = await fs.readFile(FILENAME);
     data = JSON.parse(fileContent);
   } catch (err) {
-    console.error(chalk.red(`Ошибка чтения файла ${FILENAME}`));
+    logger.error(`Ошибка чтения файла ${FILENAME}`);
   }
 
   return data;
