@@ -1,6 +1,6 @@
 'use strict';
 
-const {getLogger} = require(`../lib/logger`);
+const {getLogger} = require(`../service/lib/logger`);
 
 const fs = require(`fs`).promises;
 
@@ -43,6 +43,9 @@ class Utils {
   }
 }
 
+const ensureArray = (value) => Array.isArray(value) ? value : [value];
+
 module.exports = {
-  Utils
+  Utils,
+  ensureArray
 };

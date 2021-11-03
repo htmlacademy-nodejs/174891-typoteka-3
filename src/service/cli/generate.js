@@ -6,7 +6,6 @@ const {
   generateDate,
   generateFullText,
   generateAnnounce,
-  generateComments,
   Utils
 } = require(`../../utils/index`);
 
@@ -35,12 +34,18 @@ const Path = {
   FILE_COMMENTS_PATH: `./data/comments.txt`
 };
 
-const CommentCount = {
-  MIN: 1,
-  MAX: 10
-};
-
 const logger = getLogger({name: `api`});
+
+const generateComments = (comments) => {
+
+  const count = Utils.getRandomInt(1, comments.length);
+  return Array(count).fill({}).map(() => ({
+    id: nanoid(MAX_ID_LENGTH),
+    text: Utils.shuffle(comments)
+      .slice(0, Utils.getRandomInt(1, comments.length))
+      .join(` `),
+  }));
+};
 
 const generateOffers = async (count) => {
   const [categories, sentences, titles, comments] = await Promise.all([
@@ -57,7 +62,7 @@ const generateOffers = async (count) => {
     fullText: generateFullText(sentences),
     createdDate: generateDate(INTERVAL_IN_MONTH),
     category: generateCategory(categories),
-    comments: generateComments(Utils.getRandomInt(CommentCount.MIN, CommentCount.MAX), comments, MAX_ID_LENGTH)
+    comments: generateComments(comments)
   }));
 };
 
