@@ -1,7 +1,8 @@
 'use strict';
 
 const {
-  Utils
+  Utils,
+  ensureArray
 } = require(`./utils`);
 
 const {
@@ -15,6 +16,7 @@ const {
 
 module.exports = {
   Utils,
+  ensureArray,
   generateCategory,
   generateTitle,
   generateAnnounce,
