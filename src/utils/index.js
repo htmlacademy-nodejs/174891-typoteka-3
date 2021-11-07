@@ -11,7 +11,6 @@ const {
   generateAnnounce,
   generateFullText,
   generateDate,
-  generateComments
 } = require(`./generatePublications`);
 
 module.exports = {
@@ -22,5 +21,4 @@ module.exports = {
   generateAnnounce,
   generateFullText,
   generateDate,
-  generateComments
 };

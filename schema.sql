@@ -17,7 +17,7 @@ CREATE TABLE articles (
   title varchar(255) NOT NULL,
   created_date timestamp DEFAULT current_timestamp,
   announce text NOT NULL,
-  fullText text,
+  full_text text,
   picture varchar(50),
   user_id integer NOT NULL,
   created_at timestamp DEFAULT current_timestamp,
