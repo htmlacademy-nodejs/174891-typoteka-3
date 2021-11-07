@@ -78,3 +78,4 @@ module.exports = {
     return Utils.writeJSONFile(FILE_NAME, await generateOffers(countOffer));
   }
 };
+
