@@ -1,7 +1,6 @@
 'use strict';
 
 const {Utils: Utils} = require(`./utils`);
-const {nanoid} = require(`nanoid`);
 
 const generateCategory = (categories) => {
   return Array.of(categories[Utils.getRandomInt(0, categories.length - 1)]);
@@ -25,20 +24,10 @@ const generateDate = (monthInterval) => {
   return new Date(Utils.getRandomInt(beforeNow.valueOf(), now.valueOf())).toJSON();
 };
 
-const generateComments = (count, comments, maxIdLength) => {
-  Array(count).fill({}).map(() => ({
-    id: nanoid(maxIdLength),
-    text: Utils.shuffle(comments)
-      .slice(0, Utils.getRandomInt(1, 3))
-      .join(` `),
-  }));
-};
-
 module.exports = {
   generateCategory,
   generateTitle,
   generateAnnounce,
   generateDate,
   generateFullText,
-  generateComments
 };
