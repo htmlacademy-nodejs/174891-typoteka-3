@@ -1,43 +1,51 @@
 "use strict";
 
-const {nanoid} = require(`nanoid`);
-const {MAX_ID_LENGTH} = require(`../../constants`);
+const Aliase = require(`../models/aliase`);
 
 class ArticleService {
-  constructor(articles = []) {
-    this._articles = articles;
+  constructor(sequelize) {
+    this._Article = sequelize.models.Article;
+    this._Comment = sequelize.models.Comment;
+    this._Category = sequelize.models.Category;
   }
 
-  findAll() {
-    return this._articles;
-  }
-
-  findOne(id) {
-    return this._articles.find((article) => article.id === id);
-  }
-
-  create(article) {
-    const newArticle = Object.assign({id: nanoid(MAX_ID_LENGTH), comments: [], createdDate: Date.now()}, article);
-
-    this._articles.push(newArticle);
-
-    return newArticle;
-  }
-
-  update(oldArticle, newArticle) {
-    return Object.assign(oldArticle, newArticle);
-  }
-
-  delete(id) {
-    const article = this._articles.find((item) => item.id === id);
-
-    if (!article) {
-      return null;
+  async findAll(needComments) {
+    const include = [Aliase.CATEGORIES];
+    if (needComments) {
+      include.push(Aliase.COMMENTS);
     }
+    const articles = await this._Article.findAll({include});
+    return articles.map((item) => item.get());
+  }
 
-    this._articles = this._articles.filter((item) => item.id !== id);
-
+  async findOne(id, needComments) {
+    const include = [Aliase.CATEGORIES];
+    if (needComments) {
+      include.push(Aliase.COMMENTS);
+    }
+    const article = await this._Article.findByPk(id, {include});
     return article;
+  }
+
+  async create(articleData) {
+    const article = await this._Article.create(articleData);
+    await article.addCategories(articleData.categories);
+
+    return article.get();
+  }
+
+  async update(id, article) {
+    const [updatedArticle] = await this._Article.update(article, {
+      where: {id}
+    });
+    return !!updatedArticle;
+  }
+
+  async delete(id) {
+    const deletedArticle = await this._Article.destroy({
+      where: {id}
+    });
+    return !!deletedArticle;
   }
 }
 

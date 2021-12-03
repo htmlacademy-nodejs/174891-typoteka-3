@@ -1,29 +1,25 @@
 'use strict';
 
 const {Router} = require(`express`);
-const chalk = require(`chalk`);
-const {getMockData} = require(`../lib/get-mock-data`);
-const createCategoriesRoute = require(`./categories`);
-const createSearchRoute = require(`./search`);
-const createArticleRoute = require(`./articles`);
+const createCategoriesRoute = require(`src/service/api/category`);
+const createSearchRoute = require(`src/service/api/search`);
+const createArticleRoute = require(`src/service/api/articles`);
 const ArticleService = require(`../data-service/article`);
 const CategoryService = require(`../data-service/category`);
 const SearchService = require(`../data-service/search`);
 const CommentService = require(`../data-service/comment`);
 
+const sequelize = require(`../lib/sequelize`);
+const defineModels = require(`../models`);
+
+defineModels(sequelize);
+
 const createRouter = async () => {
   const apiRouter = new Router();
-  let data = [];
 
-  try {
-    data = await getMockData();
-  } catch (error) {
-    console.error(chalk.red(`Ошибка получения моков.`));
-  }
-
-  apiRouter.use(`/articles`, createArticleRoute(new ArticleService(data), new CommentService()));
-  apiRouter.use(`/categories`, createCategoriesRoute(new CategoryService(data)));
-  apiRouter.use(`/search`, createSearchRoute(new SearchService(data)));
+  apiRouter.use(`/articles`, createArticleRoute(new ArticleService(sequelize), new CommentService(sequelize)));
+  apiRouter.use(`/categories`, createCategoriesRoute(new CategoryService(sequelize)));
+  apiRouter.use(`/search`, createSearchRoute(new SearchService(sequelize)));
 
   return apiRouter;
 };

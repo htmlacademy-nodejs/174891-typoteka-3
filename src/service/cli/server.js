@@ -8,6 +8,7 @@ const {getLogger} = require(`../lib/logger`);
 const sequelize = require(`../lib/sequelize`);
 
 const DEFAULT_PORT = 3000;
+const EXIT_CODE = 1;
 const API_PREFIX = `/api`;
 
 const logger = getLogger({name: `api`});
@@ -49,7 +50,7 @@ module.exports = {
       await sequelize.authenticate();
     } catch (err) {
       logger.error(`An error occured: ${err.message}`);
-      process.exit(1);
+      process.exit(EXIT_CODE);
     }
     logger.info(`Connection to database established`);
 

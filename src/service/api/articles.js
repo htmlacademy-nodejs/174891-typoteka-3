@@ -9,13 +9,15 @@ const articleExist = require(`../middlewares/article-exist`);
 module.exports = (articleService, commentService) => {
   const route = new Router();
 
-  route.get(`/`, (req, res) => {
-    return res.status(HttpCode.OK).json(articleService.findAll());
+  route.get(`/`, async (req, res) => {
+    const {comments} = req.query;
+    return res.status(HttpCode.OK).json(articleService.findAll(comments));
   });
 
-  route.get(`/:articleId`, (req, res) => {
+  route.get(`/:articleId`, async (req, res) => {
     const {articleId} = req.params;
-    const article = articleService.findOne(articleId);
+    const {comments} = req.query;
+    const article = articleService.findOne(articleId, comments);
 
     if (!article) {
       return res.status(HttpCode.NOT_FOUND).send(`Not found with ${articleId}`);
@@ -24,53 +26,57 @@ module.exports = (articleService, commentService) => {
     return res.status(HttpCode.OK).json(article);
   });
 
-  route.post(`/`, articleValidator(KeysForValidation.ARTICLE), (req, res) => {
-    const newArticle = articleService.create(req.body);
+  route.post(`/`, articleValidator(KeysForValidation.ARTICLE), async (req, res) => {
+    const newArticle = await articleService.create(req.body);
 
     return res.status(HttpCode.CREATED).json(newArticle);
   });
 
-  route.put(`/:articleId`, articleExist(articleService), (req, res) => {
-    const updatedArticle = articleService.update(res.locals.article, req.body);
+  route.put(`/:articleId`, articleExist(articleService), async (req, res) => {
+    const {articleId} = req.params;
+    const updatedArticle = await articleService.update(articleId, req.body);
 
-    return res.status(HttpCode.OK).json(updatedArticle);
+    if (!updatedArticle) {
+      return res.status(HttpCode.NOT_FOUND)
+        .send(`Not found article with id ${articleId}`);
+    }
+
+    return res.status(HttpCode.OK).send(`Article successfully updated`);
   });
 
-  route.delete(`/:articleId`, (req, res) => {
+  route.delete(`/:articleId`, async (req, res) => {
     const {articleId} = req.params;
-    const article = articleService.delete(articleId);
+    const article = await articleService.delete(articleId);
 
     if (!article) {
       return res.status(HttpCode.NOT_FOUND).send(`Not found with ${articleId}`);
     }
 
-    return res.status(HttpCode.OK).json(article);
+    return res.status(HttpCode.OK).send(`Article successfully deleted`);
   });
 
-  route.post(`/:articleId/comments`, [articleExist(articleService), articleValidator(KeysForValidation.COMMENT)], (req, res) => {
-    const {article} = res.locals;
-    const newComment = commentService.create(article, req.body);
+  route.post(`/:articleId/comments`, [articleExist(articleService), articleValidator(KeysForValidation.COMMENT)], async (req, res) => {
+    const {articleId} = req.params;
+    const newComment = await commentService.create(articleId, req.body);
 
     return res.status(HttpCode.CREATED).json(newComment);
   });
 
-  route.delete(`/:articleId/comments/:commentId`, articleExist(articleService), (req, res) => {
-    const {article} = res.locals;
+  route.delete(`/:articleId/comments/:commentId`, articleExist(articleService), async (req, res) => {
     const {commentId} = req.params;
 
-    const deletedComment = commentService.delete(article, commentId);
+    const deletedComment = await commentService.delete(commentId);
 
     if (!deletedComment) {
       return res.status(HttpCode.NOT_FOUND).send(`Not found`);
     }
 
-    return res.status(HttpCode.OK).json(deletedComment);
+    return res.status(HttpCode.OK).send(`Comment successfully deleted`);
   });
 
-  route.get(`/:articleId/comments`, articleExist(articleService), (req, res) => {
-    const {article} = res.locals;
-
-    const comments = commentService.findAll(article);
+  route.get(`/:articleId/comments`, articleExist(articleService), async (req, res) => {
+    const {articleId} = req.params;
+    const comments = await commentService.findAll(articleId);
 
     return res.status(HttpCode.OK).json(comments);
   });

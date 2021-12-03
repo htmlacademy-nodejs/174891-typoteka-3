@@ -1,7 +1,6 @@
 'use strict';
 
 const {
-  generateCategory,
   generateTitle,
   generateDate,
   generateFullText,
@@ -10,11 +9,11 @@ const {
 } = require(`../../utils/index`);
 
 const {getLogger} = require(`../lib/logger`);
+const sequelize = require(`../lib/sequelize`);
+const initDatabase = require(`../lib/init-db`);
 
-const {nanoid} = require(`nanoid`);
-const {MAX_ID_LENGTH} = require(`../../constants`);
+const {ExitCode} = require(`../../constants`);
 
-const FILE_NAME = `mocks.json`;
 const INTERVAL_IN_MONTH = 3;
 
 const Count = {
@@ -34,48 +33,58 @@ const Path = {
   FILE_COMMENTS_PATH: `./data/comments.txt`
 };
 
-const logger = getLogger({name: `api`});
-
-const generateComments = (comments) => {
-
+const generateComments = (comments, users) => {
   const count = Utils.getRandomInt(1, comments.length);
   return Array(count).fill({}).map(() => ({
-    id: nanoid(MAX_ID_LENGTH),
+    user: users[Utils.getRandomInt(0, users.length - 1)].email,
     text: Utils.shuffle(comments)
       .slice(0, Utils.getRandomInt(1, comments.length))
       .join(` `),
   }));
 };
 
-const generateOffers = async (count) => {
-  const [categories, sentences, titles, comments] = await Promise.all([
-    Utils.readContent(Path.FILE_CATEGORIES_PATH),
-    Utils.readContent(Path.FILE_SENTENCES_PATH),
-    Utils.readContent(Path.FILE_TITLES_PATH),
-    Utils.readContent(Path.FILE_COMMENTS_PATH),
-  ]);
+const generateOffers = async (count, [sentences, titles, categories, comments]) => {
+
 
   return Array(count).fill({}).map(() => ({
-    id: nanoid(MAX_ID_LENGTH),
     title: generateTitle(titles),
     announce: generateAnnounce(sentences, AnnounceRestrict.MIN, AnnounceRestrict.MAX),
     fullText: generateFullText(sentences),
     createdDate: generateDate(INTERVAL_IN_MONTH),
-    category: generateCategory(categories),
+    categories: Utils.getRandomSubarray(categories),
     comments: generateComments(comments)
   }));
 };
 
+const logger = getLogger();
+
 module.exports = {
-  name: `--generate`,
+  name: `--filldb`,
   async run(args) {
-    const [count] = args;
-    const countOffer = Number.parseInt(count, 10) || Count.DEFAULT_COUNT;
-    if (countOffer > Count.MAX_COUNT) {
-      return logger.info(`Not more than 1000 offers`);
+    try {
+      logger.info(`Trying to connect to database...`);
+      await sequelize.authenticate();
+    } catch (err) {
+      logger.error(`An error occurred: ${err.message}`);
+      process.exit(ExitCode.ERROR);
     }
 
-    return Utils.writeJSONFile(FILE_NAME, await generateOffers(countOffer));
+    logger.info(`The connection to database is established`);
+
+    const data = await Promise.all([
+      Utils.readContent(Path.FILE_CATEGORIES_PATH),
+      Utils.readContent(Path.FILE_SENTENCES_PATH),
+      Utils.readContent(Path.FILE_TITLES_PATH),
+      Utils.readContent(Path.FILE_COMMENTS_PATH),
+    ]);
+
+    const [count] = args;
+    const countOffer = Number.parseInt(count, 10) || Count.DEFAULT_COUNT;
+
+    const articles = generateOffers(countOffer, data);
+    const categories = data[2];
+
+    return initDatabase(sequelize, {articles, categories});
   }
 };
 

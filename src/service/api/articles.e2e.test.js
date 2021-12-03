@@ -2,11 +2,21 @@
 
 const express = require(`express`);
 const request = require(`supertest`);
+const Sequelize = require(`sequelize`);
 
-const createArticleRoute = require(`./articles`);
+const initDB = require(`../lib/init-db`);
+const article = require(`./articles`);
 const ArticleService = require(`../data-service/article`);
 const CommentService = require(`../data-service/comment`);
 const {HttpCode} = require(`../../constants`);
+
+const mockCategories = [
+  `Деревья`,
+  `За жизнь`,
+  `Музыка`,
+  `Программирование`,
+  `Экономия`
+];
 
 const mockData = [
   {
@@ -15,14 +25,12 @@ const mockData = [
     announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Про рок-н-ролл я правда наврал, разве что в процессе разработки его в том числе слушал, но в статье про него больше ничего не будет. Из под его пера вышло 8 платиновых альбомов. Многие стали говорить о профессиональном выгорание, хотя этот термин не очень точен.`,
     fullText: `Вы можете достичь всего. Стоит только немного постараться и запастись книгами. Программировать не настолько сложно, как об этом говорят. Нет ничего более приятного, чем опыты над людьми, особенно когда тебе за это платят... Золотое сечение — соотношение двух величин, гармоническая пропорция. В связи с желанием апгрейдить свое рабочее место, появилась потребность в мониторе. Многие стали говорить о профессиональном выгорание, хотя этот термин не очень точен. Это один из лучших рок-музыкантов. Из под его пера вышло 8 платиновых альбомов. Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Ёлки — это не просто красивое дерево. Это прочная древесина. Эта статья компиляция личного опыта и перевода удивительно ценной ветки. Собрать камни бесконечности легко, если вы прирожденный герой. Про рок-н-ролл я правда наврал, разве что в процессе разработки его в том числе слушал, но в статье про него больше ничего не будет. Этот смартфон — настоящая находка. Большой и яркий экран, мощнейший процессор — всё это в небольшом гаджете. Игры и программирование разные вещи. Не стоит идти в программисты, если вам нравятся только игры. Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле? Как начать действовать? Для начала просто соберитесь. Помните, небольшое количество ежедневных упражнений лучше, чем один раз, но много. Он написал больше 30 хитов. Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения. Разве может быть что-то более незыблемое и постоянное, чем проверка «свой-чужой» с помощью кодового слова? Простые ежедневные упражнения помогут достичь успеха. Первая большая ёлка была установлена только в 1938 году. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
     createdDate: `2021-09-25T15:09:06.475Z`,
-    category: [`Деревья`],
+    categories: [`Деревья`],
     comments: [
       {
-        id: `dFG4nQ`,
         text: `Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Хочу такую же футболку :-)`,
       },
       {
-        id: `3QoYa1`,
         text: `Хочу такую же футболку :-) Плюсую, но слишком много буквы! Мне не нравится ваш стиль. Ощущение, что вы меня поучаете.`,
       },
     ],
@@ -33,14 +41,12 @@ const mockData = [
     announce: `Альбом стал настоящим открытием года. Мощные гитарные рифы и скоростные соло-партии не дадут заскучать. Многие стали говорить о профессиональном выгорание, хотя этот термин не очень точен. Ёлки — это не просто красивое дерево. Это прочная древесина. Собрать камни бесконечности легко, если вы прирожденный герой.`,
     fullText: `Золотое сечение — соотношение двух величин, гармоническая пропорция. Нет ничего более приятного, чем опыты над людьми, особенно когда тебе за это платят... Простые ежедневные упражнения помогут достичь успеха. Помните, небольшое количество ежедневных упражнений лучше, чем один раз, но много. Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина. Игры и программирование разные вещи. Не стоит идти в программисты, если вам нравятся только игры. Достичь успеха помогут ежедневные повторения. Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Про рок-н-ролл я правда наврал, разве что в процессе разработки его в том числе слушал, но в статье про него больше ничего не будет. Альбом стал настоящим открытием года. Мощные гитарные рифы и скоростные соло-партии не дадут заскучать. Собрать камни бесконечности легко, если вы прирожденный герой. Первая большая ёлка была установлена только в 1938 году. Этот смартфон — настоящая находка. Большой и яркий экран, мощнейший процессор — всё это в небольшом гаджете. Из под его пера вышло 8 платиновых альбомов. Как начать действовать? Для начала просто соберитесь. Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле? В связи с желанием апгрейдить свое рабочее место, появилась потребность в мониторе. Он написал больше 30 хитов. Вы можете достичь всего. Стоит только немного постараться и запастись книгами. Программировать не настолько сложно, как об этом говорят. Многие стали говорить о профессиональном выгорание, хотя этот термин не очень точен. Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Хорошим программистом быть нетрудно — надо всего лишь постоянно учиться. Разве может быть что-то более незыблемое и постоянное, чем проверка «свой-чужой» с помощью кодового слова?`,
     createdDate: `2021-08-28T15:38:45.805Z`,
-    category: [`За жизнь`],
+    categories: [`За жизнь`],
     comments: [
       {
-        id: `D2_u8J`,
         text: `Совсем немного...`,
       },
       {
-        id: `UD6sqA`,
         text: `Плюсую, но слишком много буквы! Согласен с автором!`,
       },
     ],
@@ -51,54 +57,48 @@ const mockData = [
     announce: `Программировать не настолько сложно, как об этом говорят. Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Про рок-н-ролл я правда наврал, разве что в процессе разработки его в том числе слушал, но в статье про него больше ничего не будет.`,
     fullText: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Хорошим программистом быть нетрудно — надо всего лишь постоянно учиться. Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле? Достичь успеха помогут ежедневные повторения. Простые ежедневные упражнения помогут достичь успеха. Собрать камни бесконечности легко, если вы прирожденный герой. Разве может быть что-то более незыблемое и постоянное, чем проверка «свой-чужой» с помощью кодового слова? Вы можете достичь всего. Стоит только немного постараться и запастись книгами. Первая большая ёлка была установлена только в 1938 году. Про рок-н-ролл я правда наврал, разве что в процессе разработки его в том числе слушал, но в статье про него больше ничего не будет. Альбом стал настоящим открытием года. Мощные гитарные рифы и скоростные соло-партии не дадут заскучать. Нет ничего более приятного, чем опыты над людьми, особенно когда тебе за это платят... В связи с желанием апгрейдить свое рабочее место, появилась потребность в мониторе. Из под его пера вышло 8 платиновых альбомов. Игры и программирование разные вещи. Не стоит идти в программисты, если вам нравятся только игры. Эта статья компиляция личного опыта и перевода удивительно ценной ветки. Этот смартфон — настоящая находка. Большой и яркий экран, мощнейший процессор — всё это в небольшом гаджете. Ёлки — это не просто красивое дерево. Это прочная древесина. Многие стали говорить о профессиональном выгорание, хотя этот термин не очень точен. Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Программировать не настолько сложно, как об этом говорят. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Это один из лучших рок-музыкантов. Помните, небольшое количество ежедневных упражнений лучше, чем один раз, но много. Золотое сечение — соотношение двух величин, гармоническая пропорция.`,
     createdDate: `2021-07-09T03:12:25.396Z`,
-    category: [`За жизнь`],
+    categories: [`За жизнь`],
     comments: [
       {
-        id: `zmgiza`,
         text: `Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Согласен с автором! Хочу такую же футболку :-) Совсем немного... Мне кажется или я уже читал это где-то? Это где ж такие красоты? Планируете записать видосик на эту тему? Плюсую, но слишком много буквы!`
       },
       {
-        id: `9nkHOd`,
         text: `Плюсую, но слишком много буквы! Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Это где ж такие красоты? Планируете записать видосик на эту тему? Согласен с автором! Совсем немного... Мне не нравится ваш стиль. Ощущение, что вы меня поучаете. Мне кажется или я уже читал это где-то?`
       }
     ]
   }
 ];
 
-const createAPI = () => {
+const createAPI = async () => {
+  const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
+  await initDB(mockDB, {categories: mockCategories, articles: mockData});
   const app = express();
-  const cloneData = JSON.parse(JSON.stringify(mockData));
   app.use(express.json());
-  app.use(
-      `/articles`,
-      createArticleRoute(new ArticleService(cloneData), new CommentService())
-  );
+  article(app, new ArticleService(mockDB), new CommentService(mockDB));
   return app;
 };
 
 describe(`Все статьи в массиве`, () => {
-  const app = createAPI();
-
   let response;
 
   beforeAll(async () => {
+    const app = await createAPI();
     response = await request(app).get(`/articles`);
   });
 
   test(`Status code 200`, () =>
     expect(response.statusCode).toBe(HttpCode.OK));
   test(`Возврашает 3 статьи`, () => expect(response.body.length).toBe(3));
-  test(`id первой статьи - "MmON2E"`, () =>
-    expect(response.body[0].id).toBe(`MmON2E`));
+  test(`Заголовок первой статьи - "Лучшие рок-музыканты 20-века"`, () =>
+    expect(response.body[0].title).toBe(`Лучшие рок-музыканты 20-века`));
 });
 
-describe(`Статья с заданным id`, () => {
-  const app = createAPI();
-
+describe(`Статья с заданным заголовком`, () => {
   let response;
 
   beforeAll(async () => {
-    response = await request(app).get(`/articles/MmON2E`);
+    const app = await createAPI();
+    response = await request(app).get(`/articles/1`);
   });
 
   test(`Status code 200`, () =>
@@ -109,24 +109,23 @@ describe(`Статья с заданным id`, () => {
 
 describe(`Сохранить новую статью, если данные валидны`, () => {
   const newArticle = {
-    "category": [`Разное`],
+    "categories": [1, 2, 3],
     "announce": `Анонс`,
     "fullText": `Оченьдлинныйтекст`,
     "title": `Оченьдлинныйзаголовок`
   };
 
-  const app = createAPI();
-
+  let app;
   let response;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
       .post(`/articles`)
       .send(newArticle);
   });
 
-  test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
-  test(`Возвращается новая статья`, () => expect(response.body).toEqual(expect.objectContaining(newArticle)));
+  test(`Status code 201`, async () => await expect(response.statusCode).toBe(HttpCode.CREATED));
   test(`Количество статей стало 4`, () => request(app)
     .get(`/articles`)
     .expect((res) => expect(res.body.length).toBe(4))
@@ -135,21 +134,25 @@ describe(`Сохранить новую статью, если данные ва
 
 describe(`Статья не создается, если данные невалидны`, () => {
   const newArticle = {
-    "category": [`Разное`],
+    "categories": [1, 2],
     "announce": `Анонс`,
     "fullText": `Оченьдлинныйтекст`,
     "title": `Оченьдлинныйзаголовок`
   };
 
-  const app = createAPI();
+  let app;
+
+  beforeAll(async () => {
+    app = await createAPI();
+  });
 
   test(`Without any required property response code is 400`, async () => {
     for (const key of Object.keys(newArticle)) {
-      const badOffer = {...newArticle};
-      delete badOffer[key];
+      const badArticle = {...newArticle};
+      delete badArticle[key];
       await request(app)
         .post(`/articles`)
-        .send(badOffer)
+        .send(badArticle)
         .expect(HttpCode.BAD_REQUEST);
     }
   });
@@ -157,120 +160,152 @@ describe(`Статья не создается, если данные невал
 
 describe(`Редактирование статьи`, () => {
   const newArticle = {
-    "category": [`Разное`],
+    "categories": [3, 4],
     "announce": `Анонс`,
     "fullText": `Оченьдлинныйтекст`,
     "title": `Оченьдлинныйзаголовок`
   };
 
-  const app = createAPI();
-
   let response;
+  let app;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
-      .put(`/articles/zQR69f`)
+      .put(`/articles/3`)
       .send(newArticle);
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Возвращает изменную статью`, () => expect(response.body).toEqual(expect.objectContaining(newArticle)));
   test(`Проверяем изменения на заголовке статьи`, () => request(app)
-    .get(`/articles/zQR69f`)
+    .get(`/articles/3`)
     .expect((res) => expect(res.body.title).toBe(`Оченьдлинныйзаголовок`))
   );
 });
 
-test(`Вернет 404, если статьи не существует`, () => {
-  const app = createAPI();
-
+describe(`Вернет 404, если статьи не существует`, () => {
   const validArticle = {
-    "category": [`Разное`],
+    "categories": [1, 3],
     "announce": `Анонс`,
     "fullText": `Оченьдлинныйтекст`,
     "title": `Оченьдлинныйзаголовок`
   };
 
-  return request(app)
-    .put(`/articles/NFound`)
-    .send(validArticle)
-    .expect(HttpCode.NOT_FOUND);
+  let response;
+  let app;
+
+  beforeAll(async () => {
+    app = await createAPI();
+    response = await request(app)
+      .put(`/articles/100`)
+      .send(validArticle)
+      .expect(HttpCode.NOT_FOUND);
+  });
+
+  test(`Status code 404`, () => expect(response.statusCode).toBe(HttpCode.NOT_FOUND));
+});
+
+describe(`Удалить статью с невалидными данными`, () => {
+  const invalidArticle = {
+    "title": `Оченьдлинныйзаголовок`,
+    "announce": `Анонс`,
+    "categories": [1, 3],
+  };
+
+  let response;
+  let app;
+
+  beforeAll(async () => {
+    app = await createAPI();
+    response = await request(app)
+      .put(`/articles/3`)
+      .send(invalidArticle);
+  });
+
+  test(`Status code 400`, () => expect(response.statusCode).toBe(HttpCode.BAD_REQUEST));
 });
 
 describe(`Удаление существующей статьи`, () => {
-  const app = createAPI();
 
   let response;
+  let app;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
-      .delete(`/articles/yEUBMb`);
+      .delete(`/articles/3`);
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Возвращаем удаленную статью`, () => expect(response.body.id).toBe(`yEUBMb`));
   test(`Статей теперь 2`, () => request(app)
     .get(`/articles`)
     .expect((res) => expect(res.body.length).toBe(2))
   );
 });
 
-test(`Ошибка при попытке удаления несуществующей статьи`, () => {
-  const app = createAPI();
+describe(`Удалить несуществующую статью`, () => {
 
-  return request(app)
-    .delete(`/articles/NFound`)
-    .expect(HttpCode.NOT_FOUND);
+  test(`Status code 404`, () => {
+    test(`Status code 404`, async () => {
+
+      const app = await createAPI();
+
+      return request(app)
+        .delete(`/articles/200`)
+        .expect(HttpCode.NOT_FOUND);
+    });
+  });
 });
 
 describe(`Все комментарии к статье`, () => {
-  const app = createAPI();
   let response;
+  let app;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
-      .get(`/articles/MmON2E/comments`);
+      .get(`/articles/1/comments`);
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
   test(`Возвращается массив из 2 комментариев`, () => expect(response.body.length).toBe(2));
-  test(`id первого комментария - dFG4nQ"`,
-      () => expect(response.body[0].id).toBe(`dFG4nQ`));
+  test(`Текст первого комментария - "Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Хочу такую же футболку :-)"`,
+      () => expect(response.body[0].text).toBe(`Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Хочу такую же футболку :-)`));
 });
 
 describe(`Создаем комментарий, если данные в запросе валидны`, () => {
-  const app = createAPI();
-
   const newComment = {
     text: `Данные в запросе валидны`
   };
 
   let response;
+  let app;
 
   beforeAll(async () => {
+    app = await createAPI();
     response = await request(app)
-      .post(`/articles/yEUBMb/comments`)
+      .post(`/articles/2/comments`)
       .send(newComment);
   });
 
   test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
   test(`Изменилось число комментариев к статье`, () => request(app)
-    .get(`/articles/yEUBMb/comments`)
+    .get(`/articles/2/comments`)
     .expect((res) => expect(res.body.length).toBe(3))
   );
   test(`Возвращается новый комментарий`, () => expect(response.body).toEqual(expect.objectContaining(newComment)));
 });
 
 test(`Возвращаем 404 если пытаемся создать комментарий к несуществующей статье`, async () => {
-  const app = createAPI();
+
+  const app = await createAPI();
 
   return request(app)
-    .post(`/articles/NFound/comments`)
+    .post(`/articles/300/comments`)
     .send({
       text: `Какой-то текст`
     })
     .expect(HttpCode.NOT_FOUND);
-
 });
 
 test(`Код 400 для попытки создать комментарий с невалидными данными`, async () => {
@@ -278,43 +313,42 @@ test(`Код 400 для попытки создать комментарий с 
     noValidProp: `Невалидный объект для создания комментария`
   };
 
-  const app = createAPI();
+  const app = await createAPI();
 
   return request(app)
-    .post(`/articles/yEUBMb/comments`)
+    .post(`/articles/2/comments`)
     .send(invalidComment)
     .expect(HttpCode.BAD_REQUEST);
 });
 
 describe(`Успешное удаление комментрия`, () => {
-  const app = createAPI();
   let response;
+  let app;
 
   beforeAll(async () => {
-    response = await request(app)
-      .delete(`/articles/zQR69f/comments/zmgiza`);
+    app = await createAPI();
+    response = await request(app).delete(`/articles/1/comments/1`);
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
   test(`Количество комментов теперь 1`, () => request(app)
-    .get(`/articles/zQR69f/comments`)
+    .get(`/articles/1/comments`)
     .expect((res) => expect(res.body.length).toBe(1))
   );
-  test(`Текст удаленного комментария`, () => expect(response.body.text).toBe(`Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Согласен с автором! Хочу такую же футболку :-) Совсем немного... Мне кажется или я уже читал это где-то? Это где ж такие красоты? Планируете записать видосик на эту тему? Плюсую, но слишком много буквы!`));
 });
 
 test(`404 при попытке удалить несуществующий комментарий`, async () => {
-  const app = createAPI();
+  const app = await createAPI();
 
   return request(app)
-    .delete(`/articles/yEUBMb/comments/NFound`)
+    .delete(`/articles/2/comments/75`)
     .expect(HttpCode.NOT_FOUND);
 });
 
 test(`404 для попытки удаления комментрия у несуществующей статьи`, async () => {
-  const app = createAPI();
+  const app = await createAPI();
 
   return request(app)
-    .delete(`/articles/NFound/comments/nfndid`)
+    .delete(`/articles/250/comments/1`)
     .expect(HttpCode.NOT_FOUND);
 });
