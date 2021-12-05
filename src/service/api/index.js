@@ -1,9 +1,9 @@
 'use strict';
 
 const {Router} = require(`express`);
-const createCategoriesRoute = require(`src/service/api/category`);
-const createSearchRoute = require(`src/service/api/search`);
-const createArticleRoute = require(`src/service/api/articles`);
+const category = require(`../api/category`);
+const search = require(`../api/search`);
+const article = require(`../api/article`);
 const ArticleService = require(`../data-service/article`);
 const CategoryService = require(`../data-service/category`);
 const SearchService = require(`../data-service/search`);
@@ -12,16 +12,14 @@ const CommentService = require(`../data-service/comment`);
 const sequelize = require(`../lib/sequelize`);
 const defineModels = require(`../models`);
 
+const apiRouter = new Router();
+
 defineModels(sequelize);
 
-const createRouter = async () => {
-  const apiRouter = new Router();
+(async () => {
+  article(apiRouter, new ArticleService(sequelize), new CommentService(sequelize));
+  category(apiRouter, new CategoryService(sequelize));
+  search(apiRouter, new SearchService(sequelize));
+})();
 
-  apiRouter.use(`/articles`, createArticleRoute(new ArticleService(sequelize), new CommentService(sequelize)));
-  apiRouter.use(`/categories`, createCategoriesRoute(new CategoryService(sequelize)));
-  apiRouter.use(`/search`, createSearchRoute(new SearchService(sequelize)));
-
-  return apiRouter;
-};
-
-module.exports = createRouter;
+module.exports = apiRouter;

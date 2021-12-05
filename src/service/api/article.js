@@ -6,12 +6,14 @@ const {HttpCode, KeysForValidation} = require(`../../constants`);
 const articleValidator = require(`../middlewares/article-validator`);
 const articleExist = require(`../middlewares/article-exist`);
 
-module.exports = (articleService, commentService) => {
+module.exports = (app, articleService, commentService) => {
   const route = new Router();
+  app.use(`/articles`, route);
 
   route.get(`/`, async (req, res) => {
     const {comments} = req.query;
-    return res.status(HttpCode.OK).json(articleService.findAll(comments));
+    const articles = await articleService.findAll(comments);
+    res.status(HttpCode.OK).json(articles);
   });
 
   route.get(`/:articleId`, async (req, res) => {
@@ -80,6 +82,4 @@ module.exports = (articleService, commentService) => {
 
     return res.status(HttpCode.OK).json(comments);
   });
-
-  return route;
 };

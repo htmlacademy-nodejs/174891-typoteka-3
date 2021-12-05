@@ -97,5 +97,9 @@ describe(`Статья по запросу не найдена`, () => {
   test(`Ответ если ничего не найдено []`, () => expect(response.body.length).toBe(0));
 });
 
-test(`API returns 400 when query string is absent`, () =>
-  request(app).get(`/search`).expect(HttpCode.BAD_REQUEST));
+describe(`API returns 400 when query string is absent`, () => {
+  test(`API returns 400`, () => request(app)
+    .get(`/search`)
+    .expect(HttpCode.BAD_REQUEST)
+  );
+});

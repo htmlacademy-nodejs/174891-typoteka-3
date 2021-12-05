@@ -3,21 +3,21 @@
 const {Router} = require(`express`);
 const {HttpCode} = require(`../../constants`);
 
-module.exports = (searchService) => {
+module.exports = (app, searchService) => {
   const route = new Router();
+  app.use(`/search`, route);
 
-  route.get(`/`, (req, res) => {
+  route.get(`/`, async (req, res) => {
     const {query: searchText = ``} = req.query;
 
     if (!searchText) {
-      res.status(HttpCode.BAD_REQUEST).json([]);
+      res.status(HttpCode.BAD_REQUEST)
+        .send(`Search query should not be empty`);
       return;
     }
 
-    const searchResults = searchService.searchOffers(searchText);
+    const searchResults = await searchService.findAll(searchText);
 
     res.status(HttpCode.OK).json(searchResults);
   });
-
-  return route;
 };

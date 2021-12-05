@@ -45,7 +45,6 @@ const generateComments = (comments, users) => {
 
 const generateOffers = async (count, [sentences, titles, categories, comments]) => {
 
-
   return Array(count).fill({}).map(() => ({
     title: generateTitle(titles),
     announce: generateAnnounce(sentences, AnnounceRestrict.MIN, AnnounceRestrict.MAX),
