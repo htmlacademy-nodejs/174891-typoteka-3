@@ -43,7 +43,7 @@ const generateComments = (comments, users) => {
   }));
 };
 
-const generateOffers = async (count, [sentences, titles, categories, comments]) => {
+const generateOffers = (count, [sentences, titles, categories, comments]) => {
 
   return Array(count).fill({}).map(() => ({
     title: generateTitle(titles),
@@ -83,7 +83,7 @@ module.exports = {
     const articles = generateOffers(countOffer, data);
     const categories = data[2];
 
-    return initDatabase(sequelize, {articles, categories});
+    return initDatabase(sequelize, {categories, articles});
   }
 };
 
