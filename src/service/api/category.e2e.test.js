@@ -54,7 +54,7 @@ const mockData = [
   },
 ];
 
-const mockCategories = [`Деревья`, `За жизнь`, `Без рамки`, `Разное`, `IT`, `Музыка`];
+const mockCategories = [`Деревья`, `За жизнь`, `Научпоп`];
 
 const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
 
@@ -66,24 +66,19 @@ beforeAll(async () => {
   category(app, new CategoryService(mockDB));
 });
 
-describe(`Вернуть список категорий`, () => {
+describe(`API returns category list`, () => {
+
   let response;
-
   beforeAll(async () => {
-    response = await request(app).get(`/categories`);
+    response = await request(app)
+      .get(`/category`);
   });
+  test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
+  test(`Returns list of 3 categories`, () => expect(response.body.length).toBe(3));
 
-  test(`Status code 200`, () =>
-    expect(response.statusCode).toBe(HttpCode.OK));
-  test(`Возвращает список из 3 категорий`, () =>
-    expect(response.body.length).toBe(3));
-
-  test(`Названия категорий "Деревья", "За жизнь", "Научпоп"`, () =>
-    expect(response.body).toEqual(
-        expect.arrayContaining([
-          `Деревья`,
-          `За жизнь`,
-          `Научпоп`,
-        ])
-    ));
+  test(`Category names are "Деревья", "За жизнь", "Научпоп"`,
+      () => expect(response.body.map((it) => it.name)).toEqual(
+          expect.arrayContaining([`Деревья`, `За жизнь`, `Научпоп`])
+      )
+  );
 });

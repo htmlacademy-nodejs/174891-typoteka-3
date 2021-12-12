@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-const defineModels = require(`../models`);
+const defineModels = require(`../models/index`);
 const Aliase = require(`../models/aliase`);
 
 module.exports = async (sequelize, {categories, articles}) => {
@@ -24,5 +24,7 @@ module.exports = async (sequelize, {categories, articles}) => {
         )
     );
   });
+
   await Promise.all(articlePromises);
 };
+

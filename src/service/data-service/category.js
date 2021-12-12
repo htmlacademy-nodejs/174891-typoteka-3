@@ -27,7 +27,7 @@ class CategoryService {
         include: [{
           model: this._ArticleCategory,
           as: Aliase.ARTICLE_CATEGORIES,
-          attributes: []
+          attributes: [],
         }]
       });
       return result.map((it) => it.get());

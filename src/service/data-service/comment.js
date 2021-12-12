@@ -28,7 +28,6 @@ class CommentService {
     });
     return comments;
   }
-
 }
 
 module.exports = CommentService;

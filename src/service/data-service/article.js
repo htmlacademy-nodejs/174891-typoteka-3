@@ -18,13 +18,12 @@ class ArticleService {
     return articles.map((item) => item.get());
   }
 
-  async findOne(id, needComments) {
+  findOne(id, needComments) {
     const include = [Aliase.CATEGORIES];
     if (needComments) {
       include.push(Aliase.COMMENTS);
     }
-    const article = await this._Article.findByPk(id, {include});
-    return article;
+    return this._Article.findByPk(id, {include});
   }
 
   async create(articleData) {
@@ -32,6 +31,16 @@ class ArticleService {
     await article.addCategories(articleData.categories);
 
     return article.get();
+  }
+
+  async findPage({limit, offset}) {
+    const {count, rows} = await this._Article.findAndCountAll({
+      limit,
+      offset,
+      include: [Aliase.CATEGORIES],
+      distinct: true
+    });
+    return {count, offers: rows};
   }
 
   async update(id, article) {

@@ -81,7 +81,7 @@ describe(`API возвращает статью на основе поисков
     expect(response.statusCode).toBe(HttpCode.OK));
   test(`Найдена 1 статья`, () => expect(response.body.length).toBe(1));
   test(`правильный заголовок найденной статьи`, () =>
-    expect(response.body[0].title).toBe(`Лучшие рок-музыканты 20-века`));
+    expect(response.body[0].title).toBe(`Борьба с прокрастинацией`));
 });
 
 describe(`Статья по запросу не найдена`, () => {
