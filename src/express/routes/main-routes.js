@@ -6,13 +6,12 @@ const mainRouter = new Router();
 const api = require(`../api`).getAPI();
 
 mainRouter.get(`/`, async (req, res) => {
-  const articles = await api.getArticles();
+  const [articles, categories] = await Promise.all([
+    api.getArticles({comments: true}),
+    api.getCategories(true)
+  ]);
 
-  articles.map((element) => {
-    element.createdDate = (new Date(element.createdDate)).toLocaleString();
-  });
-
-  res.render(`index`, {articles});
+  res.render(`index`, {articles, categories});
 });
 
 mainRouter.get(`/register`, (req, res) => res.render(`sign-up`));

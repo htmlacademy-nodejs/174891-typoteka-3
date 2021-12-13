@@ -11,6 +11,21 @@ html(lang='ru')
     link(rel='stylesheet' href='/css/style.min.css')
   body
 
+    mixin postDate(dateString)
+      -
+        const formatDate = (dateString) => {
+          const date = new Date(dateString);
+          return date.toLocaleString();
+        }
+      time.post__date(datetime='2019-03-21T20:33') #{formatDate(article.createdAt)}
+    mixin commentDate(dateString)
+      -
+        const formatDate = (dateString) => {
+          const date = new Date(dateString);
+          return date.toLocaleString();
+        }
+      time.comments__date(datetime='2019-03-21T20:33') #{formatDate(article.createdAt)}
+
     .wrapper
       block header
         include blocks/header.pug

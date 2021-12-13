@@ -27,7 +27,7 @@ const HttpCode = {
 };
 
 const KeysForValidation = {
-  ARTICLE: [`title`, `announce`, `fullText`, `category`],
+  ARTICLE: [`title`, `announce`, `fullText`, `categories`],
   COMMENT: [`text`],
 };
 

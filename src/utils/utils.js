@@ -22,6 +22,20 @@ class Utils {
     return someArray;
   }
 
+  static getRandomSubarray(items) {
+    const tempItems = items.slice();
+    let count = Utils.getRandomInt(1, tempItems.length - 1);
+    const result = [];
+    while (count--) {
+      result.push(
+          ...tempItems.splice(
+              Utils.getRandomInt(0, tempItems.length - 1), 1
+          )
+      );
+    }
+    return result;
+  }
+
   static async readContent(filePath) {
     try {
       const content = await fs.readFile(filePath, `utf-8`);
