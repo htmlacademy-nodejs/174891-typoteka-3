@@ -33,14 +33,21 @@ class ArticleService {
     return article.get();
   }
 
-  async findPage({limit, offset}) {
+  async findPage({offset, limit, comments}) {
+    const include = [Aliase.CATEGORIES];
+    if (comments) {
+      include.push(Aliase.COMMENTS);
+    }
     const {count, rows} = await this._Article.findAndCountAll({
       limit,
       offset,
-      include: [Aliase.CATEGORIES],
+      include,
+      order: [
+        [`createdAt`, `DESC`]
+      ],
       distinct: true
     });
-    return {count, offers: rows};
+    return {count, articles: rows};
   }
 
   async update(id, article) {
