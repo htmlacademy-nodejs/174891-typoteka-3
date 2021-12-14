@@ -6,6 +6,8 @@ const USER_ARGV_INDEX = 2;
 
 const MAX_ID_LENGTH = 6;
 
+const ARTICLES_PER_PAGE = 8;
+
 const Env = {
   DEVELOPMENT: `development`,
   PRODUCTION: `production`
@@ -32,6 +34,7 @@ const KeysForValidation = {
 };
 
 module.exports = {
+  ARTICLES_PER_PAGE,
   DEFAULT_COMMAND,
   USER_ARGV_INDEX,
   MAX_ID_LENGTH,
